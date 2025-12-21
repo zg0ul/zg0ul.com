@@ -12,7 +12,7 @@ import ProjectTracker from "@/components/projects/ProjectTracker";
 
 export const dynamic = "force-dynamic";
 
-type Params = Promise<{ slug: string[] }>;
+type Params = Promise<{ slug: string }>;
 /// Generate metadata for SEO
 export async function generateMetadata({
   params,

@@ -6,7 +6,7 @@ import {
   createUnauthorizedResponse,
 } from "@/lib/admin-api-auth";
 
-type Params = Promise<{ id: string[] }>;
+type Params = Promise<{ id: string }>;
 
 // GET handler to fetch a specific project
 export async function GET(
