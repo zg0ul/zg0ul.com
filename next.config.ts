@@ -1,16 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
-      },
-    },
-  },
   webpack(config) {
     // Grab the existing rule that handles SVG imports
     config.resolve.alias.canvas = false;
@@ -56,9 +46,6 @@ const nextConfig: NextConfig = {
     fileLoaderRule.exclude = /\.svg$/i;
 
     return config;
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   output: "standalone",
   reactStrictMode: true,
