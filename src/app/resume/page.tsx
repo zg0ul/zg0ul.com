@@ -1,4 +1,4 @@
-import ResumePage from "@/components/resume/ResumePage";
+import ResumePageWrapper from "@/components/resume/ResumePageWrapper";
 
 export const metadata = {
   title: "Resume | Portfolio",
@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function Resume() {
-  return <ResumePage />;
+  return <ResumePageWrapper />;
 }
