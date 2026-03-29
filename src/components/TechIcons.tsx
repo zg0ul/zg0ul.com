@@ -124,6 +124,11 @@ export const TECHNOLOGIES: Technology[] = [
       />
     ),
   },
+  {
+    id: "nestjs",
+    name: "NestJS",
+    icon: () => <PublicSVGIcon iconName="nestjs" />,
+  },
   // Flutter specific
   {
     id: "flutter",

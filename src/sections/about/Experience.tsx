@@ -16,6 +16,28 @@ interface ExperienceItem {
 
 const experiences: ExperienceItem[] = [
   {
+    title: "Software Engineer",
+    company: "Maluk",
+    duration: "May 2025 - Present",
+    location: "Amman, Jordan",
+    description: [
+      "Sole mobile developer at a fintech startup; rebuilt the entire Flutter application from scratch using Riverpod 3.0 code generation and Clean Architecture patterns.",
+      "Delivered 54+ screens across 15 feature modules with a custom design system, totaling ~122K lines of Dart across 837 files.",
+      "Contributed ~28% of the NestJS backend codebase, implementing 169 REST API endpoints for core fintech operations.",
+      "Built the React/Refine admin panel for internal operations and user management.",
+      "Shipped bilingual (Arabic/English) UI, Firebase push notifications, multi-account budgeting, and AI financial chat features to ~286 users.",
+    ],
+    skills: [
+      "flutter",
+      "dart",
+      "riverpod",
+      "nestjs",
+      "react",
+      "firebase",
+      "typescript",
+    ],
+  },
+  {
     title: "AI Engineer Intern",
     company: "SAGER",
     duration: "Feb 2025 - May 2025",

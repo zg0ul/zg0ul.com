@@ -1,67 +1,92 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "motion/react";
-import Image from "next/image";
 import { MdOutlineFileDownload } from "react-icons/md";
 import { usePageTracking } from "@/components/AnalyticsTracker";
+// Document: wrapper that loads/parses the PDF file
+// Page: renders a single page from the loaded PDF
+// pdfjs: reference to the underlying PDF.js library (Mozilla's PDF rendering engine)
+import { Document, Page, pdfjs } from "react-pdf";
+// These CSS imports style the text selection overlay and clickable links/annotations
+// within the rendered PDF pages. Without them, text selection and links look broken.
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+
+// PDF.js offloads heavy PDF parsing to a Web Worker (separate browser thread)
+// to avoid blocking the main UI thread. This tells it to fetch the worker script
+// from a CDN, version-matched to the installed pdfjs-dist package.
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+const RESUME_PDF_PATH = "/assets/pdf/zg0ul_Resume_Full.pdf";
+const RESUME_DOWNLOAD_NAME = "zg0ul_Resume.pdf";
+
+// Pulsing placeholder shown while the PDF is being fetched and parsed.
+// Uses letter-size aspect ratio (8.5:11) so the skeleton matches the final layout.
+const LoadingSkeleton = () => (
+  <div className="flex flex-col gap-4">
+    {[1, 2].map((i) => (
+      <div
+        key={i}
+        className="bg-navy-700/50 animate-pulse rounded-lg"
+        style={{ aspectRatio: "8.5/11", width: "100%" }}
+      />
+    ))}
+  </div>
+);
 
 const ResumePage = () => {
   const { trackDownload, trackCustomEvent } = usePageTracking();
+  // Total number of pages in the PDF — set once the Document finishes loading
+  const [numPages, setNumPages] = useState<number | null>(null);
+  // Current pixel width of the PDF container — used to make pages responsive
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // PDF file path
-  const flutterResumePath = "/assets/pdf/My_Resume_flutter.pdf";
-  // Commented out for future use
-  // const fullstackResumePath = "/assets/pdf/My_Resume_fullstack.pdf";
+  // Track the container's width using ResizeObserver so the PDF re-renders
+  // at the correct width whenever the viewport or layout changes (responsive).
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-  // Image version of your resume
-  const flutterResumeImage = "/assets/pdf/My_Resume_flutter.png";
-  // Commented out for future use
-  // const fullstackResumeImage = "/assets/pdf/My_Resume_fullstack.png";
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    observer.observe(container);
+    return () => observer.disconnect(); // cleanup to prevent memory leaks
+  }, []);
 
-  // Current active resume type (ready for future expansion)
-  const currentResumeType = "flutter";
+  // Called by <Document> once the PDF is fully loaded and parsed.
+  // Memoized with useCallback to keep a stable reference across renders.
+  const onDocumentLoadSuccess = useCallback(
+    ({ numPages }: { numPages: number }) => {
+      setNumPages(numPages);
+    },
+    [],
+  );
 
-  // // Function to handle resume type switching with tracking (ready for future use)
-  // const setActiveResumeWithTracking = (resumeType: "flutter" | "fullstack") => {
-  //   if (resumeType !== currentResumeType) {
-  //     trackCustomEvent("resume_type_switch", {
-  //       from: currentResumeType,
-  //       to: resumeType,
-  //       source: "resume_toggle_buttons",
-  //     });
-  //     // When multiple resumes are available, this will update state
-  //     // setActiveResume(resumeType);
-  //   }
-  // };
-
+  // Programmatic download: creates a temporary <a> element to trigger the browser's
+  // download dialog, then removes it. Also fires analytics tracking events.
   const handleDownload = () => {
-    // Currently only handling Flutter resume download
-    const path = flutterResumePath;
-    const filename = "zg0ul_Flutter_Resume.pdf";
-
-    // Track the download event
-    trackDownload(filename, "resume");
-
-    // Track additional custom event with metadata
+    trackDownload(RESUME_DOWNLOAD_NAME, "resume");
     trackCustomEvent("resume_download", {
-      resumeType: currentResumeType,
       format: "pdf",
       source: "resume_page",
-      fileName: filename,
+      fileName: RESUME_DOWNLOAD_NAME,
     });
 
-    // Create an anchor element and trigger download
     const link = document.createElement("a");
-    link.href = path;
-    link.download = filename;
+    link.href = RESUME_PDF_PATH;
+    link.download = RESUME_DOWNLOAD_NAME;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    toast.success("Downloaded Flutter resume!");
+    toast.success("Resume downloaded!");
   };
 
   return (
@@ -87,135 +112,48 @@ const ResumePage = () => {
           </Button>
         </div>
 
-        {/* Resume Image Display */}
+        {/* PDF Viewer */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
           className="w-full will-change-transform"
         >
-          <div className="border-neon relative w-full overflow-hidden rounded-lg border bg-white shadow-xl transition-all duration-300 hover:shadow-2xl">
-            <Image
-              src={flutterResumeImage}
-              alt="Flutter Developer Resume for Mohammad zgoul (zg0ul)"
-              width={800}
-              height={1032}
-              className="h-auto w-full"
-              priority
-              loading="eager"
-            />
+          {/* This container's ref is observed by ResizeObserver to track width */}
+          <div
+            ref={containerRef}
+            className="border-neon relative w-full overflow-hidden rounded-lg border bg-white shadow-xl transition-all duration-300 hover:shadow-2xl"
+          >
+            {/* Document loads the PDF file via the web worker and manages state */}
+            <Document
+              file={RESUME_PDF_PATH}
+              onLoadSuccess={onDocumentLoadSuccess}
+              loading={<LoadingSkeleton />}
+              error={
+                <div className="flex items-center justify-center p-12 text-red-500">
+                  Failed to load PDF. Please try downloading instead.
+                </div>
+              }
+            >
+              {/* Dynamically render all pages stacked vertically.
+                  Array.from creates an array of length numPages, then maps each
+                  index to a <Page> component. Works with any page count. */}
+              {numPages &&
+                Array.from({ length: numPages }, (_, index) => (
+                  <Page
+                    key={`page_${index + 1}`}
+                    pageNumber={index + 1}
+                    width={containerWidth || undefined}
+                    renderTextLayer={true}
+                    renderAnnotationLayer={true}
+                    className={index > 0 ? "border-navy-300 border-t" : ""}
+                  />
+                ))}
+            </Document>
           </div>
         </motion.div>
 
-        {/* Add some space at the bottom */}
         <div className="h-16"></div>
-
-        {/* COMMENTED OUT: FULL STACK RESUME TOGGLE FUNCTIONALITY FOR FUTURE USE
-        
-        import { useState } from "react";
-        import { AnimatePresence } from "motion/react";
-        import { ChevronRight, ChevronLeft } from "lucide-react";
-        
-        // State for toggling between resumes
-        const [activeResume, setActiveResume] = useState<"flutter" | "fullstack">("flutter");
-        
-        // Toggle function
-        const setActiveResumeWithTracking = (resumeType: "flutter" | "fullstack") => {
-    if (resumeType !== activeResume) {
-      trackCustomEvent('resume_type_switch', {
-        from: activeResume,
-        to: resumeType,
-        source: 'resume_toggle_buttons'
-      });
-      setActiveResume(resumeType);
-    }
-  };
-
-  const toggleResume = () => {
-          setActiveResume(activeResume === "flutter" ? "fullstack" : "flutter");
-        };
-        
-        // Download function for both resume types
-        const handleDownload = (type: "flutter" | "fullstack") => {
-          const path = type === "flutter" ? flutterResumePath : fullstackResumePath;
-          const filename = type === "flutter" ? "zg0ul_Flutter_Resume.pdf" : "zg0ul_Fullstack_Resume.pdf";
-          
-          // Create an anchor element and trigger download
-          const link = document.createElement("a");
-          link.href = path;
-          link.download = filename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          toast.success(`Downloaded ${type === "flutter" ? "Flutter" : "Full Stack"} resume!`);
-        };
-        
-        // Toggle UI
-        <div className="mb-6 flex justify-center">
-          <div className="flex items-center rounded-full border border-gray-700/30 bg-gray-800/50 px-2 py-1 backdrop-blur-sm">
-            <Button
-              variant={activeResume === "flutter" ? "default" : "ghost"}
-              className={`rounded-full px-4 py-2 transition-all duration-300 ${
-                activeResume === "flutter" ? "text-white" : "text-gray-400"
-              }`}
-              onClick={() => setActiveResume("flutter")}
-            >
-              Flutter
-            </Button>
-            <div className="h-6 w-px bg-gray-700/50"></div>
-            <Button
-              variant={activeResume === "fullstack" ? "default" : "ghost"}
-              className={`rounded-full px-4 py-2 transition-all duration-300 ${
-                activeResume === "fullstack" ? "text-white" : "text-gray-400"
-              }`}
-              onClick={() => setActiveResume("fullstack")}
-            >
-              Full Stack
-            </Button>
-          </div>
-        </div>
-        
-        // Toggle button in controls
-        <Button
-          onClick={toggleResume}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          {activeResume === "flutter" ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-          <span className="hidden sm:inline">Switch to</span>{" "}
-          {activeResume === "flutter" ? "Full Stack" : "Flutter"}
-        </Button>
-        
-        // Animated display with both resume options
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeResume}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="w-full"
-          >
-            <div className="relative w-full overflow-hidden rounded-lg border border-gray-700 bg-white shadow-xl">
-              <Image
-                src={activeResume === "flutter" ? flutterResumeImage : fullstackResumeImage}
-                alt={`${activeResume === "flutter" ? "Flutter" : "Full Stack"} Developer Resume`}
-                width={800}
-                height={1032}
-                className="h-auto w-full"
-                priority
-              />
-            </div>
-          </motion.div>
-        </AnimatePresence>
-        
-        END COMMENTED OUT SECTION */}
       </div>
     </section>
   );

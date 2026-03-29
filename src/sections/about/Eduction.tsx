@@ -62,7 +62,7 @@ function AboutPageEducation() {
                       transition={{ duration: 0.4, delay: 0.8 }}
                     >
                       <span className="from-neon/20 to-neon-4/20 text-neon border-neon/30 shadow-glow-xs rounded-lg border bg-gradient-to-r px-3 py-1.5 text-xs font-semibold backdrop-blur-sm sm:text-sm">
-                        GPA: 3.58/4.0 (excellent)
+                        GPA: 3.58/4.0 (Excellent) — Top of Class
                       </span>
                     </motion.div>
                   </div>
