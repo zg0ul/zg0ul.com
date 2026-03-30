@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { ProjectCategory } from "@/lib/supabase/types";
 
 export async function GET(request: Request) {
   try {
@@ -11,9 +10,9 @@ export async function GET(request: Request) {
 
     let query = supabase.from("projects").select("*");
 
-    // Filter by category if provided
+    // Filter by category if provided (using contains for array column)
     if (category && category !== "All") {
-      query = query.eq("category", category as ProjectCategory);
+      query = query.contains("categories", [category]);
     }
 
     // Order by display_order, then created_at

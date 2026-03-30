@@ -38,7 +38,7 @@ export default function ProjectEditor({
     featured_image: "",
     github_url: "",
     live_url: "",
-    category: "",
+    categories: [],
     technologies: [],
     gallery_images: [],
     start_date: "",
@@ -99,14 +99,14 @@ export default function ProjectEditor({
     }
   };
 
-  const handleCategoryChange = (category: string) => {
-    setFormData((prev) => ({ ...prev, category }));
+  const handleCategoriesChange = (categories: string[]) => {
+    setFormData((prev) => ({ ...prev, categories }));
 
-    // Clear category error if exists
-    if (errors.category) {
+    // Clear categories error if exists
+    if (errors.categories) {
       setErrors((prev) => {
         const newErrors = { ...prev };
-        delete newErrors.category;
+        delete newErrors.categories;
         return newErrors;
       });
     }
@@ -147,7 +147,8 @@ export default function ProjectEditor({
       newErrors.short_description = "Short description is required";
     if (!formData.long_description.trim())
       newErrors.long_description = "Long description is required";
-    if (!formData.category) newErrors.category = "Category is required";
+    if (formData.categories.length === 0)
+      newErrors.categories = "At least one category is required";
     if (!formData.featured_image)
       newErrors.featured_image = "Featured image is required";
     if (formData.technologies.length === 0)
@@ -297,11 +298,11 @@ export default function ProjectEditor({
               onChange={handleFeaturedImageChange}
             />
 
-            {/* Category */}
+            {/* Categories */}
             <CategorySelector
-              value={formData.category}
-              error={errors.category}
-              onChange={handleCategoryChange}
+              value={formData.categories}
+              error={errors.categories}
+              onChange={handleCategoriesChange}
             />
 
             {/* Technologies */}

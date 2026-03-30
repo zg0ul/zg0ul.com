@@ -8,7 +8,7 @@ export type ProjectType = {
   featured_image: string;
   github_url: string;
   live_url: string;
-  category: string;
+  categories: string[];
   technologies: string[];
   gallery_images: string[];
   created_at?: string;

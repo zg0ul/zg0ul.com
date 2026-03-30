@@ -9,7 +9,7 @@ import { Loader2, Check, X, Plus } from "lucide-react";
 import EnhancedMarkdownEditor from "@/components/admin/MarkdownEditor";
 import {
   PROJECT_CATEGORIES,
-  CategoryWithIcon,
+  CategoriesWithIcons,
 } from "@/components/ProjectCategories";
 import { TECHNOLOGIES, TechnologyWithIcon } from "@/components/TechIcons";
 import { ProjectType } from "@/types/project";
@@ -31,7 +31,7 @@ export function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
     featured_image: "",
     github_url: "",
     live_url: "",
-    category: "",
+    categories: [],
     technologies: [],
     gallery_images: [],
     start_date: "",
@@ -143,15 +143,18 @@ export function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
     }
   };
 
-  // Handle category selection
+  // Handle category selection (toggle)
   const handleCategoryChange = (categoryId: string) => {
-    setFormData({ ...formData, category: categoryId });
+    const newCategories = formData.categories.includes(categoryId)
+      ? formData.categories.filter((id) => id !== categoryId)
+      : [...formData.categories, categoryId];
+    setFormData({ ...formData, categories: newCategories });
 
-    // Clear validation error when category is updated
-    if (validationErrors["category"]) {
+    // Clear validation error when categories is updated
+    if (validationErrors["categories"]) {
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
-        delete newErrors["category"];
+        delete newErrors["categories"];
         return newErrors;
       });
     }
@@ -195,8 +198,8 @@ export function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
       errors.short_description = "Short description is required";
     }
 
-    if (!formData.category) {
-      errors.category = "Category is required";
+    if (formData.categories.length === 0) {
+      errors.categories = "At least one category is required";
     }
 
     if (!formData.featured_image && !imagePreviewUrl) {
@@ -492,33 +495,33 @@ export function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
             )}
           </div>
 
-          {/* Category */}
+          {/* Categories */}
           <div className="space-y-2">
             <label
-              htmlFor="category"
+              htmlFor="categories"
               className="text-foreground block text-sm font-medium"
             >
-              Category <span className="text-red-500">*</span>
+              Categories <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <div
                 className={`border-navy-600 bg-navy-700/50 rounded-lg border shadow-sm ${
-                  validationErrors.category ? "border-red-500" : ""
+                  validationErrors.categories ? "border-red-500" : ""
                 }`}
               >
-                {formData.category ? (
+                {formData.categories.length > 0 ? (
                   <div className="flex items-center justify-between p-3">
-                    <CategoryWithIcon categoryId={formData.category} />
+                    <CategoriesWithIcons categoryIds={formData.categories} maxDisplay={3} showBadge={false} />
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, category: "" })}
+                      onClick={() => setFormData({ ...formData, categories: [] })}
                       className="text-gray-400 hover:text-gray-200"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                 ) : (
-                  <div className="p-3 text-gray-400">Select a category</div>
+                  <div className="p-3 text-gray-400">Select categories</div>
                 )}
               </div>
 
@@ -530,7 +533,7 @@ export function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
                       key={category.id}
                       onClick={() => handleCategoryChange(category.id)}
                       className={`my-1 flex cursor-pointer items-center justify-between rounded-md p-2 ${
-                        formData.category === category.id
+                        formData.categories.includes(category.id)
                           ? "bg-neon/20 text-neon"
                           : "hover:bg-navy-600/80"
                       }`}
@@ -539,7 +542,7 @@ export function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
                         {category.icon}
                         <span>{category.label}</span>
                       </div>
-                      {formData.category === category.id && (
+                      {formData.categories.includes(category.id) && (
                         <Check className="h-4 w-4" />
                       )}
                     </div>
@@ -547,9 +550,9 @@ export function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
                 </div>
               </div>
             </div>
-            {validationErrors.category && (
+            {validationErrors.categories && (
               <p className="mt-1 text-xs text-red-500">
-                {validationErrors.category}
+                {validationErrors.categories}
               </p>
             )}
           </div>

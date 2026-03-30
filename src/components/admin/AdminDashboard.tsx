@@ -32,7 +32,7 @@ interface DashboardData {
     id: string;
     title: string;
     created_at: string;
-    category: string;
+    categories: string[];
     featured: boolean;
   }>;
   categoryStats: Record<string, number>;
@@ -288,7 +288,7 @@ export default function AdminDashboard({ data }: AdminDashboardProps) {
                           )}
                         </div>
                         <div className="text-navy-400 mt-1 flex items-center gap-2 text-sm">
-                          <span>{project.category}</span>
+                          <span>{project.categories?.join(", ") || "Uncategorized"}</span>
                           <span>•</span>
                           <span>{formatDate(project.created_at)}</span>
                         </div>

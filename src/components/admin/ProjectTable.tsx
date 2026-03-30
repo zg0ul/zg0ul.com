@@ -21,7 +21,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CategoryWithIcon } from "@/components/ProjectCategories";
+import { CategoriesWithIcons } from "@/components/ProjectCategories";
 import { toast } from "sonner";
 
 interface Project {
@@ -30,7 +30,7 @@ interface Project {
   slug: string;
   short_description: string;
   featured_image: string;
-  category: string;
+  categories: string[];
   technologies: string[];
   github_url?: string;
   live_url?: string;
@@ -54,7 +54,7 @@ export function AdminProjectTable({
   const router = useRouter();
 
   // Get unique categories for filter
-  const categories = [...new Set(projects.map((p) => p.category))];
+  const categories = [...new Set(projects.flatMap((p) => p.categories || []))];
 
   // Filter projects
   const filteredProjects = projects.filter((project) => {
@@ -64,7 +64,7 @@ export function AdminProjectTable({
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
     const matchesCategory =
-      categoryFilter === "all" || project.category === categoryFilter;
+      categoryFilter === "all" || project.categories?.includes(categoryFilter);
     return matchesSearch && matchesCategory;
   });
 
@@ -212,7 +212,7 @@ export function AdminProjectTable({
                       <div className="text-navy-400 flex flex-wrap items-center gap-2 text-xs">
                         <div className="flex items-center gap-1">
                           <Tag className="h-3 w-3" />
-                          <CategoryWithIcon categoryId={project.category} />
+                          <CategoriesWithIcons categoryIds={project.categories} maxDisplay={2} />
                         </div>
                         <span>•</span>
                         <div className="flex items-center gap-1">

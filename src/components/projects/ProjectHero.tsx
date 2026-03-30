@@ -12,7 +12,7 @@ interface ProjectHeroProps {
   project: {
     featured_image: string;
     title: string;
-    category: string;
+    categories: string[];
     short_description: string;
     github_url?: string;
     live_url?: string;

@@ -19,7 +19,7 @@ export default function ProjectsClient({
 
   // Filter projects based on the selected category
   const filteredProjects = activeCategory
-    ? initialProjects.filter((project) => project.category === activeCategory)
+    ? initialProjects.filter((project) => project.categories?.includes(activeCategory))
     : initialProjects;
 
   return (

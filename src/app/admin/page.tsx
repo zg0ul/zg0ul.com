@@ -27,20 +27,23 @@ async function AdminPage() {
     // Get recent projects
     const { data: recentProjects } = await adminClient
       .from("projects")
-      .select("id, title, created_at, category, featured")
+      .select("id, title, created_at, categories, featured")
       .order("created_at", { ascending: false })
       .limit(5);
 
     // Get projects by category
     const { data: projectsByCategory } = await adminClient
       .from("projects")
-      .select("category")
-      .order("category");
+      .select("categories");
 
+    // Count categories (each project can have multiple)
     const categoryStats =
       projectsByCategory?.reduce(
         (acc, project) => {
-          acc[project.category] = (acc[project.category] || 0) + 1;
+          const categories = project.categories || [];
+          categories.forEach((cat: string) => {
+            acc[cat] = (acc[cat] || 0) + 1;
+          });
           return acc;
         },
         {} as Record<string, number>,

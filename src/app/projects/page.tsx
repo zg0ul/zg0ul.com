@@ -19,9 +19,9 @@ export default async function ProjectsPage() {
     console.error("Error fetching projects:", error);
   }
 
-  // Get unique categories for filtering
+  // Get unique categories for filtering (flatten all project categories)
   const categories = projects
-    ? [...new Set(projects.map((project) => project.category))] // Get unique categories
+    ? [...new Set(projects.flatMap((project) => project.categories || []))]
     : [];
 
   return (

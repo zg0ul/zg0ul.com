@@ -108,6 +108,44 @@ export function CategoryWithIcon({ categoryId }: { categoryId: string }) {
   );
 }
 
+// Component to display multiple categories with icons
+export function CategoriesWithIcons({
+  categoryIds,
+  maxDisplay = 2,
+  showBadge = true,
+}: {
+  categoryIds: string[];
+  maxDisplay?: number;
+  showBadge?: boolean;
+}) {
+  if (!categoryIds || categoryIds.length === 0) {
+    return <span className="text-sm text-gray-400">Uncategorized</span>;
+  }
+
+  const displayCategories = categoryIds.slice(0, maxDisplay);
+  const remainingCount = categoryIds.length - maxDisplay;
+
+  return (
+    <div className="flex flex-wrap items-center gap-5">
+      {displayCategories.map((categoryId) => {
+        const category = getCategoryById(categoryId);
+        if (!category) return null;
+        return (
+          <div key={categoryId} className="flex items-center gap-1.5">
+            {category.icon}
+            <span className="text-sm">{category.label}</span>
+          </div>
+        );
+      })}
+      {showBadge && remainingCount > 0 && (
+        <span className="bg-navy-600/50 rounded-full px-2 py-0.5 text-xs text-gray-300">
+          +{remainingCount}
+        </span>
+      )}
+    </div>
+  );
+}
+
 // Get all technologies across all categories
 export function getAllTechnologies(): string[] {
   const allTechs: string[] = [];

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import * as motion from "motion/react-client";
 import { ExternalLink, ArrowRight } from "lucide-react";
-import { CategoryWithIcon } from "@/components/ProjectCategories";
+import { CategoriesWithIcons } from "@/components/ProjectCategories";
 import { TechnologyWithIcon } from "@/components/TechIcons";
 import { ProjectType } from "@/types/project";
 import { FiGithub } from "react-icons/fi";
@@ -60,7 +60,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
           {/* Category badge */}
           <div className="bg-navy-700/90 absolute bottom-3 left-3 rounded-full px-3 py-1.5 text-sm backdrop-blur-sm">
-            <CategoryWithIcon categoryId={project.category} />
+            <CategoriesWithIcons categoryIds={project.categories} maxDisplay={2} />
           </div>
         </div>
 

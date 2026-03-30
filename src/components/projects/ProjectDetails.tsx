@@ -1,10 +1,10 @@
 import { TechStack } from "@/components/projects/TechStack";
-import { CategoryWithIcon } from "@/components/ProjectCategories";
+import { CategoriesWithIcons } from "@/components/ProjectCategories";
 
 interface ProjectDetailsProps {
   project: {
     technologies: string[];
-    category: string;
+    categories: string[];
     start_date?: string;
     end_date?: string;
     created_at: string;
@@ -39,9 +39,9 @@ export function ProjectDetails({
         <h3 className="mb-4 text-xl font-bold">Project Details</h3>
         <dl className="space-y-4">
           <div>
-            <dt className="text-navy-200 text-sm">Category</dt>
+            <dt className="text-navy-200 text-sm">Categories</dt>
             <dd className="mt-1 font-medium">
-              <CategoryWithIcon categoryId={project.category} />
+              <CategoriesWithIcons categoryIds={project.categories} maxDisplay={3} showBadge={false} />
             </dd>
           </div>
           <div>

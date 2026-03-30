@@ -1,15 +1,9 @@
-export type ProjectCategory =
-  | "AI"
-  | "Front-end"
-  | "Flutter"
-  | "Mechatronics Engineering";
-
 export interface SupabaseProject {
   id: string;
   title: string;
   description: string;
   technologies: string[];
-  category: ProjectCategory;
+  categories: string[];
   github_link?: string;
   thumbnail_url: string;
   detailed_content: string;
@@ -32,7 +26,7 @@ export interface CreateProjectPayload {
   title: string;
   description: string;
   technologies: string[];
-  category: ProjectCategory;
+  categories: string[];
   github_link?: string;
   thumbnail_url: string;
   detailed_content: string;
